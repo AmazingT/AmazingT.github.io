@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>canvas绘制时钟</title>
+</head>
+<body>
+    <canvas id="clock" width="200" height="200"></canvas>
+
+    <script>
+        (function() {
+            var clock = {
+                context: null,
+                init: function() {
+                    var canvas = document.querySelector("#clock");
+                    this.context = canvas.getContext("2d");
+                    // 绘制表盘 循环绘制时分秒钟
+                    this.clockRotate();
+                },
+                clockRotate: function() {
+                    var _this = this;
+                    setInterval(function() {
+                        _this.drawClockBlcok();
+                        _this.drawClock();
+                    }, 1000);
+                },
+                drawClockBlcok: function() {
+                    var ctx = this.context;
+                    var pi = Math.PI;
+
+                    ctx.clearRect(0, 0, 200, 200);
+                    ctx.save();
+                    ctx.translate(100, 100);
+
+                    ctx.beginPath();
+                    ctx.arc(0, 0, 100, 0, 2 * pi);
+                    ctx.stroke();
+                    ctx.closePath();
+
+                    for (var i = 0;i < 60;i++) {
+                        // save：用来保存Canvas的状态。save之后，可以调用Canvas的平移、放缩、旋转、错切、裁剪等操作。
+                        ctx.save();
+                        ctx.rotate(i *(pi / 180) * (360 / 60));
+                        ctx.beginPath();
+                        ctx.moveTo(70, 0);
+                        ctx.lineTo(90, 0);
+                        ctx.lineWith = i % 5 ? 2 : 4;
+                        ctx.strokeStyle = i % 5 ? "blue" : "red";
+                        ctx.stroke();
+                        ctx.closePath();
+                        // restore：用来恢复Canvas之前保存的状态。防止save后对Canvas执行的操作对后续的绘制有影响。
+                        ctx.restore();
+                    }
+                    ctx.restore();
+                },
+                drawClock: function() {
+                    var ctx = this.context;
+                    var pi = Math.PI;
+                    var t = new Date();
+
+                    var s = t.getSeconds(),
+                        m = t.getMinutes(),
+                        h = t.getHours();
+                    // 时分秒钟显示弧度
+                    var sAngle = s * (360 / 60) * (pi / 180);
+                    var mAngle = sAngle / 60 + m * (360 / 60) * (pi / 180);
+                    var hAngle = mAngle / 12 + h * (360 / 12) * (pi / 180);
+
+                    // 开始绘制(弧度 长度 宽度 颜色)
+                    this.drawLine(sAngle, 70, 2, "green");
+                    this.drawLine(mAngle, 60, 3, "blue");
+                    this.drawLine(hAngle, 50, 4, "red");
+                },
+                drawLine: function(angle, line, width, color) {
+                    var ctx = this.context;
+
+                    ctx.save();
+                    ctx.translate(100, 100);
+                    ctx.rotate(-Math.PI / 2 + angle);
+                    ctx.beginPath();
+                    ctx.moveTo(-4, 0);
+                    ctx.lineTo(line, 0);
+                    ctx.lineWidth = width;
+                    ctx.strokeStyle = color;
+                    ctx.lineCap = "round";
+                    ctx.stroke();
+                    ctx.closePath();
+                    ctx.restore();
+                }
+            };
+            
+            clock.init();
+        })();
+    </script>
+</body>
+</html>
